@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1057608106764",
+    "project_id": "barkbeacon-f8a9b",
+    "storage_bucket": "barkbeacon-f8a9b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1057608106764:android:67bba1efdf3f69cd897f29",
+        "android_client_info": {
+          "package_name": "com.example.barkbeacon"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6rd8_IZfCqpzKagWMAIw81tXnuFCauC0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
