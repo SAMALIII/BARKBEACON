@@ -18,3 +18,12 @@ TECHNOLOGIES USED
 - Bluetooth Low Energy (BLE)
 - GPS / Location Services
 - Smartphone Sensors
+
+MILESTONE 1 (team roles)
+
+ Pethmi - Team Lead [Project Manager & Backend Integration Developer]
+ Nehaara -  UI/UX / Frontend Developer 
+ Onela - QA Lead & Firebase
+ Ismail - Frontend Developer &  Bluetooth & Sensor Developer [testing stage]
+
+
