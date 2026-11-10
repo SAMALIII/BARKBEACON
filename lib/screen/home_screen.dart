@@ -8,251 +8,198 @@ import 'bluetooth_scanner_screen.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  static const Color primaryBlue = Color(0xFF4169E1);
-  static const Color lightBlue = Color(0xFFEAF4FF);
+  // BarkBeacon theme colours
+  static const Color navy = Color(0xFF142B52);
+  static const Color electricBlue = Color(0xFF2563EB);
+  static const Color paleBlue = Color(0xFFE8F0FF);
+  static const Color white = Color(0xFFFFFFFF);
+  static const Color amber = Color(0xFFF59E0B);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: white,
 
       body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 15,
-                ),
-                child: Column(
-                  children: [
-                    // Top decoration
-                    Container(
-                      width: 70,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: Colors.blueGrey.shade300,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            children: [
+              const SizedBox(height: 15),
 
-                    const SizedBox(height: 28),
+              // Logo
+              const Icon(Icons.pets, color: electricBlue, size: 48),
 
-                    // BarkBeacon Logo
-                    const Icon(
-                      Icons.pets,
-                      size: 48,
-                      color: primaryBlue,
-                    ),
+              const SizedBox(height: 8),
 
-                    const SizedBox(height: 6),
-
-                    const Text(
-                      'BarkBeacon',
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        color: primaryBlue,
-                      ),
-                    ),
-
-                    const SizedBox(height: 3),
-
-                    const Text(
-                      'Find Your Furry Friend',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    const Text(
-                      'A community-powered network to find lost pets and keep them safe.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.black54,
-                      ),
-                    ),
-
-                    const SizedBox(height: 22),
-
-                    // Pet image placeholder
-                    Container(
-                      width: 125,
-                      height: 125,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        border: Border.all(
-                          color: Colors.black54,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.pets,
-                        size: 65,
-                        color: Colors.black54,
-                      ),
-                    ),
-
-                    const SizedBox(height: 25),
-
-                    // MY PET PROFILE
-                    _menuButton(
-                      icon: Icons.pets,
-                      text: 'My Pet Profile',
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const ProfileScreen(),
-                          ),
-                        );
-                      },
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    // REPORT LOST PET
-                    _menuButton(
-                      icon: Icons.warning_amber_rounded,
-                      text: 'Report a Lost Pet',
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const ReportLostScreen(),
-                          ),
-                        );
-                      },
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    // FIND A PET / MAP
-                    _menuButton(
-                      icon: Icons.location_on_outlined,
-                      text: 'Find a Pet',
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const MapScreen(),
-                          ),
-                        );
-                      },
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    // BLUETOOTH SCANNER
-                    _menuButton(
-                      icon: Icons.bluetooth,
-                      text: 'Bluetooth Scanner',
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const BluetoothScannerScreen(),
-                          ),
-                        );
-                      },
-                    ),
-
-                    const SizedBox(height: 15),
-                  ],
+              // App name
+              const Text(
+                'BarkBeacon',
+                style: TextStyle(
+                  fontSize: 38,
+                  fontWeight: FontWeight.bold,
+                  color: navy,
                 ),
               ),
-            ),
 
-            // BOTTOM NAVIGATION
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border(
-                  top: BorderSide(
-                    color: Colors.grey.shade300,
-                  ),
+              const SizedBox(height: 4),
+
+              // Tagline
+              const Text(
+                'Find Your Furry Friend',
+                style: TextStyle(
+                  fontSize: 21,
+                  fontWeight: FontWeight.bold,
+                  color: navy,
                 ),
               ),
-              child: BottomNavigationBar(
-                currentIndex: 0,
-                type: BottomNavigationBarType.fixed,
-                backgroundColor: Colors.white,
-                selectedItemColor: primaryBlue,
-                unselectedItemColor: Colors.blueGrey,
-                selectedFontSize: 11,
-                unselectedFontSize: 11,
 
-                items: const [
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.home),
-                    label: 'Home',
-                  ),
+              const SizedBox(height: 20),
 
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.map_outlined),
-                    label: 'Map',
-                  ),
+              // Description
+              const Text(
+                'A community-powered network to find lost pets and keep them safe.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 18, height: 1.4, color: navy),
+              ),
 
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.bluetooth_searching),
-                    label: 'Scanner',
-                  ),
+              const SizedBox(height: 22),
 
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.person),
-                    label: 'Profile',
-                  ),
-                ],
+              // Pet image placeholder
+              Container(
+                height: 145,
+                width: 145,
+                decoration: BoxDecoration(
+                  color: paleBlue,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: electricBlue, width: 2),
+                ),
+                child: const Icon(Icons.pets, color: electricBlue, size: 85),
+              ),
 
-                onTap: (index) {
-                  // HOME
-                  if (index == 0) {
-                    return;
-                  }
+              const SizedBox(height: 22),
 
-                  // MAP
-                  if (index == 1) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            const MapScreen(),
-                      ),
-                    );
-                  }
-
-                  // SCANNER
-                  else if (index == 2) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            const BluetoothScannerScreen(),
-                      ),
-                    );
-                  }
-
-                  // PROFILE
-                  else if (index == 3) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            const ProfileScreen(),
-                      ),
-                    );
-                  }
+              // My Pet Profile
+              _menuButton(
+                title: 'My Pet Profile',
+                icon: Icons.pets,
+                highlighted: true,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ProfileScreen(),
+                    ),
+                  );
                 },
               ),
+
+              const SizedBox(height: 13),
+
+              // Report Lost Pet
+              _menuButton(
+                title: 'Report a Lost Pet',
+                icon: Icons.warning_amber_rounded,
+                highlighted: false,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ReportLostScreen(),
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 13),
+
+              // Find a Pet
+              _menuButton(
+                title: 'Find a Pet',
+                icon: Icons.location_on,
+                highlighted: false,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const MapScreen()),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 13),
+
+              // Bluetooth Scanner
+              _menuButton(
+                title: 'Bluetooth Scanner',
+                icon: Icons.bluetooth,
+                highlighted: false,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const BluetoothScannerScreen(),
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+
+      // Bottom navigation
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: white,
+          border: Border(top: BorderSide(color: paleBlue, width: 2)),
+        ),
+        child: BottomNavigationBar(
+          currentIndex: 0,
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: white,
+          selectedItemColor: electricBlue,
+          unselectedItemColor: navy,
+          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+          onTap: (index) {
+            Widget? destination;
+
+            switch (index) {
+              case 0:
+                return;
+              case 1:
+                destination = const MapScreen();
+                break;
+              case 2:
+                destination = const BluetoothScannerScreen();
+                break;
+              case 3:
+                destination = const ProfileScreen();
+                break;
+            }
+
+            if (destination != null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => destination!),
+              );
+            }
+          },
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.location_on),
+              label: 'Map',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.bluetooth),
+              label: 'Scanner',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.account_circle),
+              label: 'Profile',
             ),
           ],
         ),
@@ -260,46 +207,38 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // Reusable Home button
-  Widget _menuButton({
+  // Reusable menu button
+  static Widget _menuButton({
+    required String title,
     required IconData icon,
-    required String text,
-    required VoidCallback onPressed,
+    required bool highlighted,
+    required VoidCallback onTap,
   }) {
     return SizedBox(
       width: double.infinity,
-      height: 50,
+      height: 62,
       child: OutlinedButton(
-        onPressed: onPressed,
-
+        onPressed: onTap,
         style: OutlinedButton.styleFrom(
-          backgroundColor: lightBlue,
-          foregroundColor: Colors.black87,
-
-          side: const BorderSide(
-            color: Color(0xFF8CB4E8),
-          ),
-
+          backgroundColor: highlighted ? paleBlue : white,
+          foregroundColor: electricBlue,
+          side: const BorderSide(color: electricBlue, width: 2.5),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(40),
           ),
         ),
-
         child: Row(
           children: [
-            Icon(
-              icon,
-              color: primaryBlue,
-              size: 22,
-            ),
-
+            Icon(icon, size: 32, color: highlighted ? amber : electricBlue),
             const SizedBox(width: 14),
-
-            Text(
-              text,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 15,
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: navy,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
