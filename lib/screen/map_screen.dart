@@ -4,10 +4,12 @@ import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../services/pet_service.dart';
+import '../app_colors.dart';
 import 'report_lost_screen.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
 import 'bluetooth_scanner_screen.dart';
+import 'radar_screen.dart';
 
 class MapScreen extends StatefulWidget {
   final bool selectLocation;
@@ -22,8 +24,11 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  static const Color primaryBlue = Color(0xFF4169E1);
-  static const Color lostPetRed = Color(0xFFE53935);
+  static const Color primaryBlue = AppColors.secondaryBlue;
+  static const Color navy = AppColors.primaryNavy;
+  static const Color pageBackground = AppColors.background;
+  static const Color accentAmber = AppColors.accentAmber;
+  static const Color lostPetRed = AppColors.accentAmber;
 
   final MapController _mapController = MapController();
   final PetService _petService = PetService();
@@ -199,6 +204,43 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
+  void _openPetRadar(Map<String, dynamic> pet) {
+    final latitude = pet['latitude'];
+    final longitude = pet['longitude'];
+
+    if (latitude is! num || longitude is! num) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Pet location is unavailable.'),
+        ),
+      );
+      return;
+    }
+
+    final userLocation = _currentLocation ?? _defaultLocation;
+
+    final distance = Geolocator.distanceBetween(
+      userLocation.latitude,
+      userLocation.longitude,
+      latitude.toDouble(),
+      longitude.toDouble(),
+    );
+
+    final petName = (pet['petname'] ?? 'Lost Pet').toString();
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => RadarScreen(
+          petName: petName,
+          latitude: latitude.toDouble(),
+          longitude: longitude.toDouble(),
+          distance: distance,
+        ),
+      ),
+    );
+  }
+
   void _showPetDetails(Map<String, dynamic> pet) {
   final petName = (pet['petname'] ?? 'Lost Pet').toString();
   final breed = (pet['breed'] ?? 'Unknown').toString();
@@ -268,29 +310,37 @@ class _MapScreenState extends State<MapScreen> {
           ),
         ),
         actions: [
-        TextButton(
-  onPressed: () async {
-    Navigator.pop(dialogContext);
+          TextButton.icon(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              _openPetRadar(pet);
+            },
+            icon: const Icon(Icons.radar),
+            label: const Text('Track Pet'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(dialogContext);
 
-    final result = await Navigator.push<bool>(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ReportLostScreen(
-          existingReport: Map<String, dynamic>.from(pet),
-        ),
-      ),
-    );
+              final result = await Navigator.push<bool>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ReportLostScreen(
+                    existingReport: Map<String, dynamic>.from(pet),
+                  ),
+                ),
+              );
 
-    if (result == true && mounted) {
-      setState(() {
-        _loadingLostPets = true;
-      });
+              if (result == true && mounted) {
+                setState(() {
+                  _loadingLostPets = true;
+                });
 
-      await _loadLostPetLocations();
-    }
-  },
-  child: const Text('Edit'),
-),
+                await _loadLostPetLocations();
+              }
+            },
+            child: const Text('Edit'),
+          ),
           TextButton(
             onPressed: () async {
               final reportId = pet['id']?.toString();
@@ -357,7 +407,10 @@ class _MapScreenState extends State<MapScreen> {
       children: [
         Text(
           label,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: AppColors.primaryNavy,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 3),
         Text(value),
@@ -412,17 +465,15 @@ class _MapScreenState extends State<MapScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFEAF4FF),
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(
-          color: const Color(0xFF8CB4E8),
-        ),
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.secondaryBlue.withOpacity(0.18)),
       ),
       child: Row(
         children: [
           CircleAvatar(
             radius: 25,
-            backgroundColor: const Color(0xFFD8ECDD),
+            backgroundColor: AppColors.white,
             child: Icon(icon, color: primaryBlue),
           ),
           const SizedBox(width: 12),
@@ -435,9 +486,10 @@ class _MapScreenState extends State<MapScreen> {
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
+                    color: navy,
                   ),
                 ),
-                Text(subtitle),
+                Text(subtitle, style: const TextStyle(color: AppColors.primaryNavy)),
                 if (distance.isNotEmpty) ...[
                   const SizedBox(height: 3),
                   Text(
@@ -492,11 +544,11 @@ class _MapScreenState extends State<MapScreen> {
     final mapCenter = _currentLocation ?? _defaultLocation;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: pageBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
-        foregroundColor: Colors.black,
+        foregroundColor: navy,
         centerTitle: true,
         title: Text(
           widget.selectLocation
@@ -540,9 +592,9 @@ class _MapScreenState extends State<MapScreen> {
                         width: double.infinity,
                         clipBehavior: Clip.hardEdge,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF3F6F8),
-                          border: Border.all(color: Colors.black54),
-                          borderRadius: BorderRadius.circular(4),
+                          color: AppColors.white,
+                          border: Border.all(color: AppColors.secondaryBlue.withOpacity(0.18)),
+                          borderRadius: BorderRadius.circular(18),
                         ),
                         child: Stack(
                           children: [
@@ -712,8 +764,8 @@ class _MapScreenState extends State<MapScreen> {
                                 heroTag: widget.selectLocation
                                     ? 'selectLocationGpsButton'
                                     : 'currentLocationButton',
-                                backgroundColor: Colors.white,
-                                foregroundColor: primaryBlue,
+                                backgroundColor: AppColors.white,
+                                foregroundColor: AppColors.primaryNavy,
                                 onPressed: () {
                                   setState(() {
                                     _loadingLocation = true;
@@ -753,8 +805,11 @@ class _MapScreenState extends State<MapScreen> {
                     label: const Text('Report a Lost Pet'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryBlue,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      foregroundColor: AppColors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                   ),
                 ),
@@ -774,14 +829,12 @@ class _MapBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const primaryBlue = Color(0xFF4169E1);
-
     return BottomNavigationBar(
       currentIndex: 1,
       type: BottomNavigationBarType.fixed,
-      backgroundColor: Colors.white,
-      selectedItemColor: primaryBlue,
-      unselectedItemColor: Colors.blueGrey,
+      backgroundColor: AppColors.white,
+      selectedItemColor: AppColors.secondaryBlue,
+      unselectedItemColor: AppColors.primaryNavy.withOpacity(0.55),
       selectedFontSize: 11,
       unselectedFontSize: 11,
       items: const [
