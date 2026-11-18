@@ -1,8 +1,6 @@
-import 'package:flutter/material.dart';
 
-import 'home_screen.dart';
-import 'map_screen.dart';
-import 'bluetooth_scanner_screen.dart';
+import 'package:flutter/material.dart';
+import '../services/pet_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -12,300 +10,541 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  static const Color navy = Color(0xFF142B52);
-  static const Color electricBlue = Color(0xFF2563EB);
-  static const Color paleBlue = Color(0xFFE8F0FF);
-  static const Color white = Color(0xFFFFFFFF);
-  static const Color amber = Color(0xFFF59E0B);
+  static const Color primaryBlue = Color(0xFF4169E1);
+  static const Color lightBlue = Color(0xFFEAF4FF);
 
+  final PetService _petService = PetService();
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController breedController = TextEditingController();
-  final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController _petNameController =
+      TextEditingController();
+  final TextEditingController _breedController =
+      TextEditingController();
+  final TextEditingController _descriptionController =
+      TextEditingController();
+
+  List<Map<String, dynamic>> _pets = [];
+
+  String? _editingPetId;
+  bool _isLoading = true;
+  bool _isSaving = false;
+  bool _isAddingPet = false;
 
   @override
-  void dispose() {
-    nameController.dispose();
-    breedController.dispose();
-    descriptionController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _loadPets();
   }
 
-  void saveProfile() {
-    if (_formKey.currentState!.validate()) {
+  Future<void> _loadPets() async {
+    try {
+      final pets = await _petService.getPetProfiles();
+      final oldProfile = await _petService.getPetProfile();
+
+      if (oldProfile != null &&
+          oldProfile['petname'] != null &&
+          !pets.any((pet) => pet['id'] == 'my_pet_profile')) {
+        pets.insert(0, {
+          'id': 'my_pet_profile',
+          ...oldProfile,
+        });
+      }
+
+      if (!mounted) return;
+
+      setState(() {
+        _pets = pets;
+        _isAddingPet = pets.isEmpty;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not load pets: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  void _startAddingPet() {
+    _petNameController.clear();
+    _breedController.clear();
+    _descriptionController.clear();
+    _formKey.currentState?.reset();
+
+    setState(() {
+      _editingPetId = null;
+      _isAddingPet = true;
+    });
+  }
+
+  void _startEditingPet(Map<String, dynamic> pet) {
+    _petNameController.text = pet['petname']?.toString() ?? '';
+    _breedController.text = pet['breed']?.toString() ?? '';
+    _descriptionController.text =
+        pet['description']?.toString() ?? '';
+
+    setState(() {
+      _editingPetId = pet['id']?.toString();
+      _isAddingPet = true;
+    });
+  }
+
+  String? _validatePetName(String? value) {
+    final name = value?.trim() ?? '';
+
+    if (name.isEmpty) {
+      return 'Please enter your pet name.';
+    }
+
+    if (name.length < 2 || name.length > 30) {
+      return 'Name must be 2–30 characters.';
+    }
+
+    if (!RegExp(r"^[a-zA-Z][a-zA-Z .'-]*$").hasMatch(name)) {
+      return 'Use letters and common name characters only.';
+    }
+
+    return null;
+  }
+
+
+String? _validateBreed(String? value) {
+  final breed = value?.trim() ?? '';
+
+  if (breed.isEmpty) {
+    return 'Please enter your pet breed.';
+  }
+
+  if (breed.length < 2 || breed.length > 40) {
+    return 'Breed must be 2–40 characters.';
+  }
+
+  if (!RegExp(r"^[a-zA-Z][a-zA-Z .'-]*$").hasMatch(breed)) {
+    return 'Breed must contain letters only.';
+  }
+
+  return null;
+}
+
+
+  String? _validateDescription(String? value) {
+    final description = value?.trim() ?? '';
+
+    if (description.isEmpty) {
+      return 'Please enter a description.';
+    }
+
+    if (description.length < 5 || description.length > 200) {
+      return 'Description must be 5–200 characters.';
+    }
+
+    return null;
+  }
+
+  Future<void> _savePet() async {
+    if (_isSaving) return;
+
+    FocusScope.of(context).unfocus();
+
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      return;
+    }
+
+    final name = _petNameController.text.trim();
+    final breed = _breedController.text.trim();
+    final description = _descriptionController.text.trim();
+
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      if (_editingPetId == 'my_pet_profile') {
+        await _petService.savePetProfile(
+          petName: name,
+          breed: breed,
+          description: description,
+        );
+      } else if (_editingPetId != null) {
+        await _petService.updatePetProfile(
+          petId: _editingPetId!,
+          petName: name,
+          breed: breed,
+          description: description,
+        );
+      } else {
+        await _petService.addPetProfile(
+          petName: name,
+          breed: breed,
+          description: description,
+        );
+      }
+
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Pet profile saved successfully!'),
-          backgroundColor: navy,
         ),
       );
+
+      setState(() {
+        _isAddingPet = false;
+        _editingPetId = null;
+        _isLoading = true;
+      });
+
+      await _loadPets();
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Unable to save pet: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
     }
+  }
+
+  @override
+  void dispose() {
+    _petNameController.dispose();
+    _breedController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: white,
-
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: white,
+        backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: navy),
-          onPressed: () => Navigator.pop(context),
-        ),
+        foregroundColor: Colors.black,
         title: const Text(
           'Pet Profile',
           style: TextStyle(
-            color: navy,
-            fontSize: 23,
             fontWeight: FontWeight.bold,
+            fontSize: 20,
           ),
         ),
       ),
-
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 25),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 25),
-
-                // Pet photo placeholder
-                Center(
-                  child: Column(
-                    children: [
-                      Container(
-                        height: 145,
-                        width: 145,
-                        decoration: BoxDecoration(
-                          color: paleBlue,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: electricBlue, width: 2),
-                        ),
-                        child: const Icon(
-                          Icons.pets,
-                          color: electricBlue,
-                          size: 75,
-                        ),
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 25,
+                        vertical: 15,
                       ),
-
-                      const SizedBox(height: 12),
-
-                      OutlinedButton(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Photo upload can be added later.'),
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.grey.shade100,
+                              border: Border.all(
+                                color: Colors.black54,
+                              ),
                             ),
-                          );
-                        },
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: electricBlue,
-                          side: const BorderSide(color: electricBlue, width: 2),
-                          shape: const StadiumBorder(),
-                        ),
-                        child: const Text(
-                          'Change Photo',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
+                            child: const Icon(
+                              Icons.pets,
+                              size: 55,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          if (_isAddingPet) ...[
+                            Form(
+                              key: _formKey,
+                              child: Column(
+                                children: [
+                                  _fieldTitle('Pet Name'),
+                                  TextFormField(
+                                    controller: _petNameController,
+                                    validator: _validatePetName,
+                                    maxLength: 30,
+                                    textCapitalization:
+                                        TextCapitalization.words,
+                                    decoration:
+                                        _inputDecoration('e.g. Milo'),
+                                  ),
+                                  const SizedBox(height: 18),
+
+                                  _fieldTitle('Breed'),
+                                  TextFormField(
+                                    controller: _breedController,
+                                    validator: _validateBreed,
+                                    maxLength: 40,
+                                    textCapitalization:
+                                        TextCapitalization.words,
+                                    decoration: _inputDecoration(
+                                      'e.g. Golden Retriever',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 18),
+
+                                  _fieldTitle('Description'),
+                                  TextFormField(
+                                    controller: _descriptionController,
+                                    validator: _validateDescription,
+                                    maxLength: 200,
+                                    maxLines: 3,
+                                    textCapitalization:
+                                        TextCapitalization.sentences,
+                                    decoration: _inputDecoration(
+                                      'e.g. Friendly, 3 years old...',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 25),
+
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: 50,
+                                    child: ElevatedButton(
+                                      onPressed:
+                                          _isSaving ? null : _savePet,
+                                      style: _buttonStyle(),
+                                      child: _isSaving
+                                          ? const SizedBox(
+                                              width: 22,
+                                              height: 22,
+                                              child:
+                                                  CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                              ),
+                                            )
+                                          : const Text(
+                                              'Save Pet',
+                                              style: TextStyle(
+                                                fontWeight:
+                                                    FontWeight.bold,
+                                              ),
+                                            ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            if (_pets.isNotEmpty)
+                              TextButton(
+                                onPressed: _isSaving
+                                    ? null
+                                    : () {
+                                        FocusScope.of(context).unfocus();
+                                        _formKey.currentState?.reset();
+
+                                        setState(() {
+                                          _isAddingPet = false;
+                                          _editingPetId = null;
+                                        });
+                                      },
+                                child: const Text('Cancel'),
+                              ),
+                          ] else ...[
+                            const Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'My Registered Pets',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+
+                            ..._pets.map((pet) {
+                              return Card(
+                                color: lightBlue,
+                                elevation: 0,
+                                margin:
+                                    const EdgeInsets.only(bottom: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(18),
+                                  side: const BorderSide(
+                                    color: Color(0xFF8CB4E8),
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.pets,
+                                            color: primaryBlue,
+                                            size: 30,
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Text(
+                                              pet['petname']
+                                                      ?.toString() ??
+                                                  'Unnamed Pet',
+                                              style: const TextStyle(
+                                                fontWeight:
+                                                    FontWeight.bold,
+                                                fontSize: 17,
+                                              ),
+                                            ),
+                                          ),
+                                          IconButton(
+                                            onPressed: _isSaving
+                                                ? null
+                                                : () =>
+                                                    _startEditingPet(
+                                                      pet,
+                                                    ),
+                                            icon: const Icon(
+                                              Icons.edit_outlined,
+                                              color: primaryBlue,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Text(
+                                        'Breed: ${pet['breed']?.toString().isNotEmpty == true ? pet['breed'] : 'Not provided'}',
+                                      ),
+                                      const SizedBox(height: 5),
+                                      Text(
+                                        'Description: ${pet['description']?.toString().isNotEmpty == true ? pet['description'] : 'Not provided'}',
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }),
+
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: ElevatedButton.icon(
+                                onPressed:
+                                    _isSaving ? null : _startAddingPet,
+                                icon: const Icon(Icons.add),
+                                label: const Text('Add Another Pet'),
+                                style: _buttonStyle(),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  BottomNavigationBar(
+                    currentIndex: 3,
+                    type: BottomNavigationBarType.fixed,
+                    backgroundColor: Colors.white,
+                    selectedItemColor: primaryBlue,
+                    unselectedItemColor: Colors.blueGrey,
+                    selectedFontSize: 11,
+                    unselectedFontSize: 11,
+                    items: const [
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.home),
+                        label: 'Home',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.map_outlined),
+                        label: 'Map',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.bluetooth_searching),
+                        label: 'Scanner',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.person),
+                        label: 'Profile',
                       ),
                     ],
+                    onTap: (index) {
+                      if (index == 0) {
+                        Navigator.pop(context);
+                      }
+                    },
                   ),
-                ),
+                ],
+              ),
+      ),
+    );
+  }
 
-                const SizedBox(height: 28),
+  ButtonStyle _buttonStyle() {
+    return ElevatedButton.styleFrom(
+      backgroundColor: lightBlue,
+      foregroundColor: Colors.black87,
+      elevation: 0,
+      side: const BorderSide(color: Color(0xFF8CB4E8)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+    );
+  }
 
-                // Pet name
-                const Text(
-                  'Pet Name *',
-                  style: TextStyle(
-                    color: navy,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                _inputField(
-                  controller: nameController,
-                  hint: 'e.g. Max',
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your pet name';
-                    }
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: 22),
-
-                // Breed
-                const Text(
-                  'Breed',
-                  style: TextStyle(
-                    color: navy,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                _inputField(
-                  controller: breedController,
-                  hint: 'e.g. Golden Retriever',
-                ),
-
-                const SizedBox(height: 22),
-
-                // Description
-                const Text(
-                  'Description',
-                  style: TextStyle(
-                    color: navy,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                _inputField(
-                  controller: descriptionController,
-                  hint: 'e.g. Friendly, 3 years old...',
-                  maxLines: 3,
-                ),
-
-                const SizedBox(height: 25),
-
-                // Save button
-                SizedBox(
-                  width: double.infinity,
-                  height: 58,
-                  child: ElevatedButton(
-                    onPressed: saveProfile,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: electricBlue,
-                      foregroundColor: white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(35),
-                      ),
-                    ),
-                    child: const Text(
-                      'Save',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 25),
-              ],
-            ),
+  Widget _fieldTitle(String title) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 4, bottom: 6),
+        child: Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
           ),
         ),
       ),
-
-      bottomNavigationBar: _bottomNavigation(context, 3),
     );
   }
 
-  // Reusable text input
-  Widget _inputField({
-    required TextEditingController controller,
-    required String hint,
-    String? Function(String?)? validator,
-    int maxLines = 1,
-  }) {
-    return TextFormField(
-      controller: controller,
-      validator: validator,
-      maxLines: maxLines,
-      style: const TextStyle(color: navy),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(color: Colors.grey),
-        filled: true,
-        fillColor: white,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 15,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: const BorderSide(color: paleBlue, width: 2.5),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: const BorderSide(color: electricBlue, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(color: amber),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(color: amber),
+  InputDecoration _inputDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: TextStyle(
+        color: Colors.grey.shade500,
+        fontSize: 13,
+      ),
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 14,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: const BorderSide(
+          color: primaryBlue,
+          width: 1.5,
         ),
       ),
     );
   }
-}
-
-// Shared-style bottom navigation for this screen
-Widget _bottomNavigation(BuildContext context, int currentIndex) {
-  const Color navy = Color(0xFF142B52);
-  const Color electricBlue = Color(0xFF2563EB);
-
-  return BottomNavigationBar(
-    currentIndex: currentIndex,
-    type: BottomNavigationBarType.fixed,
-    backgroundColor: Colors.white,
-    selectedItemColor: electricBlue,
-    unselectedItemColor: navy,
-    selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
-    unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
-    onTap: (index) {
-      Widget? destination;
-
-      switch (index) {
-        case 0:
-          destination = const HomeScreen();
-          break;
-        case 1:
-          destination = const MapScreen();
-          break;
-        case 2:
-          destination = const BluetoothScannerScreen();
-          break;
-        case 3:
-          return;
-      }
-
-      if (destination != null) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => destination!),
-        );
-      }
-    },
-    items: const [
-      BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-      BottomNavigationBarItem(icon: Icon(Icons.location_on), label: 'Map'),
-      BottomNavigationBarItem(icon: Icon(Icons.bluetooth), label: 'Scanner'),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.account_circle),
-        label: 'Profile',
-      ),
-    ],
-  );
 }
