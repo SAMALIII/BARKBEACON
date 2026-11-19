@@ -24,6 +24,7 @@ class _ReportLostScreenState extends State<ReportLostScreen> {
   static const Color primaryBlue = Color(0xFF4169E1);
   static const Color lightBlue = Color(0xFFEAF4FF);
   static const Color borderBlue = Color(0xFF8CB4E8);
+  
 
   final PetService _petService = PetService();
   final _formKey = GlobalKey<FormState>();

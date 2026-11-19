@@ -467,7 +467,7 @@ class _MapScreenState extends State<MapScreen> {
       decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.secondaryBlue.withOpacity(0.18)),
+        border: Border.all(color: AppColors.secondaryBlue.withValues(alpha: 0.18)),
       ),
       child: Row(
         children: [
@@ -593,7 +593,7 @@ class _MapScreenState extends State<MapScreen> {
                         clipBehavior: Clip.hardEdge,
                         decoration: BoxDecoration(
                           color: AppColors.white,
-                          border: Border.all(color: AppColors.secondaryBlue.withOpacity(0.18)),
+                          border: Border.all(color: AppColors.secondaryBlue.withValues(alpha: 0.18)),
                           borderRadius: BorderRadius.circular(18),
                         ),
                         child: Stack(
@@ -834,7 +834,7 @@ class _MapBottomBar extends StatelessWidget {
       type: BottomNavigationBarType.fixed,
       backgroundColor: AppColors.white,
       selectedItemColor: AppColors.secondaryBlue,
-      unselectedItemColor: AppColors.primaryNavy.withOpacity(0.55),
+      unselectedItemColor: AppColors.primaryNavy.withValues(alpha: 0.55),
       selectedFontSize: 11,
       unselectedFontSize: 11,
       items: const [
