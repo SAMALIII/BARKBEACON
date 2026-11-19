@@ -1,334 +1,281 @@
+
+
 import 'package:flutter/material.dart';
+import '../app_colors.dart';
 
 class RadarScreen extends StatelessWidget {
-  const RadarScreen({super.key});
+  final String? petName;
+  final double? latitude;
+  final double? longitude;
+  final double? distance;
 
-  static const Color primaryBlue = Color(0xFF4169E1);
-  static const Color lightBlue = Color(0xFFEAF4FF);
+  const RadarScreen({
+    super.key,
+    this.petName,
+    this.latitude,
+    this.longitude,
+    this.distance,
+  });
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
+  String get formattedDistance {
+    if (distance == null) return 'Not available';
 
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        foregroundColor: Colors.black,
-        centerTitle: true,
-        title: const Text(
-          'Radar',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
+    if (distance! >= 1000) {
+      return '${(distance! / 1000).toStringAsFixed(2)} km';
+    }
 
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        color: lightBlue,
-                        borderRadius:
-                            BorderRadius.circular(15),
-                        border: Border.all(
-                          color: const Color(0xFF8CB4E8),
-                        ),
-                      ),
-                      child: const Row(
-                        children: [
-                          Icon(
-                            Icons.pets,
-                            color: primaryBlue,
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              children: [
-                                Text(
-                                  'Pet Found Nearby!',
-                                  style: TextStyle(
-                                    fontWeight:
-                                        FontWeight.bold,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  'Follow the direction and signal strength to reach your pet.',
-                                  textAlign:
-                                      TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 35),
-
-                    // Compass / Radar
-                    Container(
-                      width: 230,
-                      height: 230,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.grey.shade50,
-                        border: Border.all(
-                          color: Colors.black54,
-                          width: 2,
-                        ),
-                      ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          const Positioned(
-                            top: 12,
-                            child: Text(
-                              'N',
-                              style: TextStyle(
-                                fontWeight:
-                                    FontWeight.bold,
-                              ),
-                            ),
-                          ),
-
-                          const Positioned(
-                            bottom: 12,
-                            child: Text(
-                              'S',
-                              style: TextStyle(
-                                fontWeight:
-                                    FontWeight.bold,
-                              ),
-                            ),
-                          ),
-
-                          const Positioned(
-                            left: 14,
-                            child: Text(
-                              'W',
-                              style: TextStyle(
-                                fontWeight:
-                                    FontWeight.bold,
-                              ),
-                            ),
-                          ),
-
-                          const Positioned(
-                            right: 14,
-                            child: Text(
-                              'E',
-                              style: TextStyle(
-                                fontWeight:
-                                    FontWeight.bold,
-                              ),
-                            ),
-                          ),
-
-                          Container(
-                            width: 125,
-                            height: 125,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-
-                          const Icon(
-                            Icons.navigation,
-                            size: 70,
-                            color: primaryBlue,
-                          ),
-
-                          const Positioned(
-                            bottom: 50,
-                            right: 45,
-                            child: Icon(
-                              Icons.pets,
-                              color: Colors.black54,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        color: lightBlue,
-                        borderRadius:
-                            BorderRadius.circular(15),
-                        border: Border.all(
-                          color: const Color(0xFF8CB4E8),
-                        ),
-                      ),
-                      child: const Row(
-                        children: [
-                          Icon(
-                            Icons.signal_cellular_alt,
-                            color: primaryBlue,
-                          ),
-
-                          SizedBox(width: 12),
-
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Signal Strength',
-                                  style: TextStyle(
-                                    fontWeight:
-                                        FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  '-40 dBm',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          Chip(
-                            label: Text(
-                              'Hot',
-                              style: TextStyle(
-                                fontWeight:
-                                    FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 15),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _informationBox(
-                            'Distance',
-                            '12 m',
-                          ),
-                        ),
-
-                        const SizedBox(width: 12),
-
-                        Expanded(
-                          child: _informationBox(
-                            'Direction',
-                            'North East',
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    const Text(
-                      'Prototype values shown for Milestone 1',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const _RadarBottomBar(),
-          ],
-        ),
-      ),
-    );
+    return '${distance!.toStringAsFixed(0)} m';
   }
 
-  Widget _informationBox(
-    String title,
-    String value,
-  ) {
+  String get formattedLocation {
+    if (latitude == null || longitude == null) {
+      return 'Not available';
+    }
+
+    return '${latitude!.toStringAsFixed(5)}, '
+        '${longitude!.toStringAsFixed(5)}';
+  }
+
+  Widget _infoCard({
+    required IconData icon,
+    required String title,
+    required String value,
+  }) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(
-          color: const Color(0xFF8CB4E8),
-        ),
       ),
-      child: Column(
+      child: Row(
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.black54,
-            ),
+          Icon(
+            icon,
+            color: AppColors.secondaryBlue,
+            size: 28,
           ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: AppColors.primaryNavy,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    color: AppColors.primaryNavy,
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
   }
-}
-
-class _RadarBottomBar extends StatelessWidget {
-  const _RadarBottomBar();
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: 2,
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: const Color(0xFF4169E1),
-      unselectedItemColor: Colors.blueGrey,
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Home',
+    return Scaffold(
+      backgroundColor: AppColors.background,
+
+      appBar: AppBar(
+        title: const Text(
+          'Pet Radar',
+          style: TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.map_outlined),
-          label: 'Map',
+        backgroundColor: AppColors.primaryNavy,
+        iconTheme: const IconThemeData(
+          color: AppColors.white,
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.bluetooth_searching),
-          label: 'Scanner',
+      ),
+
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            const SizedBox(height: 15),
+
+            const Icon(
+              Icons.radar,
+              size: 45,
+              color: AppColors.secondaryBlue,
+            ),
+
+            const SizedBox(height: 12),
+
+            Text(
+              '${petName ?? 'Nearby Pet'} is nearby!',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 23,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryNavy,
+              ),
+            ),
+
+            const SizedBox(height: 25),
+
+            // Radar visual
+            SizedBox(
+              height: 260,
+              width: 260,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 250,
+                    height: 250,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.secondaryBlue,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+
+                  Container(
+                    width: 180,
+                    height: 180,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.secondaryBlue.withValues(
+                          alpha: 0.6,
+                        ),
+                        width: 2,
+                      ),
+                    ),
+                  ),
+
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.secondaryBlue.withValues(
+                        alpha: 0.12,
+                      ),
+                      border: Border.all(
+                        color: AppColors.secondaryBlue,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+
+                  const Icon(
+                    Icons.pets,
+                    size: 42,
+                    color: AppColors.primaryNavy,
+                  ),
+
+                  const Positioned(
+                    top: 0,
+                    child: Text(
+                      'N',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryNavy,
+                      ),
+                    ),
+                  ),
+
+                  const Positioned(
+                    bottom: 0,
+                    child: Text(
+                      'S',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryNavy,
+                      ),
+                    ),
+                  ),
+
+                  const Positioned(
+                    left: 0,
+                    child: Text(
+                      'W',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryNavy,
+                      ),
+                    ),
+                  ),
+
+                  const Positioned(
+                    right: 0,
+                    child: Text(
+                      'E',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryNavy,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 25),
+
+            _infoCard(
+              icon: Icons.pets,
+              title: 'Pet Name',
+              value: petName ?? 'Not available',
+            ),
+
+            _infoCard(
+              icon: Icons.social_distance,
+              title: 'Distance from you',
+              value: formattedDistance,
+            ),
+
+            _infoCard(
+              icon: Icons.location_on,
+              title: 'Pet Location',
+              value: formattedLocation,
+            ),
+
+            const SizedBox(height: 15),
+
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: const Text(
+                'Radar is currently a visual prototype. '
+                'Live Bluetooth scanning, signal strength and '
+                'compass direction are not yet implemented.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColors.primaryNavy,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+          ],
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: 'Profile',
-        ),
-      ],
+      ),
     );
   }
 }
