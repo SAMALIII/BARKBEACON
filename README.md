@@ -19,7 +19,7 @@ TECHNOLOGIES USED
 - GPS / Location Services
 - Smartphone Sensors
 
-MILESTONE 1 (team roles)
+<MILESTONE 1 (team roles)>
 
  Pethmi - Team Lead [Project Manager & Backend Integration Developer]
  
@@ -29,4 +29,39 @@ MILESTONE 1 (team roles)
  
  Ismail - Frontend Developer &  Bluetooth & Sensor Developer [testing stage]
 
+ 
+ 
+< MILESTONE 2 >
 
+Milestone 2 focuses on integrating map and location functionality into BarkBeacon.
+
+
+Main Development Areas
+
+-OpenStreetMap integration using flutter_map.
+
+-Retrieving the user's current geographical location.
+
+-GPS functionality using the Geolocator package.
+
+-Lost-pet reporting and location data management.
+
+-Displaying lost-pet locations using map markers.
+
+-Location permission handling.
+
+-Connecting map functionality with Firebase Cloud Firestore.
+
+
+Main Objective
+
+To allow users to view geographical locations and identify where lost pets have been reported through an interactive map.
+
+<(team roles)>
+Pethmi - PM / Frontend Dev / Backend Integration
+
+Nehaara - Frontend Dev
+
+Onela - Backend Dev / Firebase /Maps Integration
+
+Ismail - Maps Integration / Bluetooth (research stage)
