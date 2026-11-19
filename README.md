@@ -58,6 +58,7 @@ Main Objective
 To allow users to view geographical locations and identify where lost pets have been reported through an interactive map.
 
 <(team roles)>
+
 Pethmi - PM / Frontend Dev / Backend Integration
 
 Nehaara - Frontend Dev
